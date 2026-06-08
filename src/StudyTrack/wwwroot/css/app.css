@@ -1,0 +1,54 @@
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.summary-card,
+.placeholder-panel {
+    border: 1px solid #d6d5d5;
+    border-radius: 0.75rem;
+    padding: 1rem;
+    background: #ffffff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.summary-card h2,
+.placeholder-panel h2 {
+    font-size: 1.15rem;
+    margin-bottom: 0.5rem;
+}
+
+.studytrack-topbar {
+    font-weight: 600;
+}
+
+.app-tagline {
+    color: #2f4f6f;
+}
+
+.studytrack-footer {
+    border-top: 1px solid #d6d5d5;
+    margin-top: 2rem;
+    padding: 1rem 1.5rem;
+    color: #333333;
+    background: #f8f9fa;
+    font-size: 0.95rem;
+}
+
+.lead {
+    font-size: 1.08rem;
+    color: #333333;
+}
+
+.skeleton-table {
+    margin-top: 1rem;
+}
+
+@media (max-width: 700px) {
+    .studytrack-footer {
+        padding: 0.75rem;
+        font-size: 0.85rem;
+    }
+}

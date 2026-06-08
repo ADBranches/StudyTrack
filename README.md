@@ -8,7 +8,7 @@ StudyTrack helps students organize courses, assignments, deadlines, priorities, 
 
 ## Current Build Phase
 
-Phase 0: Project setup and repository hygiene.
+Phase 1: Project skeleton, navigation, layout, branding, and placeholder pages.
 
 ## Planned Core Features
 
@@ -34,3 +34,12 @@ Run these commands from the repository root:
 ## Project Board
 
 https://trello.com/b/kXoxNah7
+
+
+## Phase 1 Navigation Routes
+
+- `/` and `/dashboard` — Dashboard
+- `/courses` — Courses
+- `/assignments` — Assignments
+- `/study-sessions` — Study Sessions
+- `/help` — Help and documentation overview

@@ -10,4 +10,9 @@ This document records implementation decisions, project structure, build command
 
 ## Current Phase
 
-Phase 0: repository setup and hygiene.
+Phase 1: project skeleton and navigation.
+
+
+## Phase 1 Notes
+
+Phase 1 creates the application shell, layout, navigation links, placeholder pages, early responsive styling, and route validation process.
