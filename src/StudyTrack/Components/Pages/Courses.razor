@@ -1,20 +1,231 @@
 @page "/courses"
+@rendermode InteractiveServer
+@using System.ComponentModel.DataAnnotations
+@using StudyTrack.Models
+@using StudyTrack.Services
+@inject CourseService CourseService
 
 <PageTitle>Courses</PageTitle>
 
-<h1>Courses</h1>
+<h1>Course Management</h1>
 
 <p class="lead">
-    Course management will let students create, view, edit, and remove courses.
+    Create, view, update, and delete courses. Courses organize assignments by class or subject.
 </p>
 
-<div class="placeholder-panel">
-    <h2>Planned Course Actions</h2>
-    <ul>
-        <li>Create a course</li>
-        <li>View course list</li>
-        <li>Edit course details</li>
-        <li>Delete a course</li>
-        <li>View assignments connected to a course</li>
-    </ul>
-</div>
+@if (!string.IsNullOrWhiteSpace(successMessage))
+{
+    <div class="alert alert-success" role="alert">@successMessage</div>
+}
+
+@if (!string.IsNullOrWhiteSpace(errorMessage))
+{
+    <div class="alert alert-danger" role="alert">@errorMessage</div>
+}
+
+<section class="crud-panel">
+    <h2>@(editingCourseId is null ? "Add Course" : "Edit Course")</h2>
+
+    <EditForm Model="courseForm" OnValidSubmit="SaveCourseAsync">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="form-grid">
+            <div class="form-field">
+                <label for="course-name">Course Name</label>
+                <InputText id="course-name" class="form-control" @bind-Value="courseForm.Name" />
+                <ValidationMessage For="@(() => courseForm.Name)" />
+            </div>
+
+            <div class="form-field">
+                <label for="course-code">Course Code</label>
+                <InputText id="course-code" class="form-control" @bind-Value="courseForm.Code" />
+                <ValidationMessage For="@(() => courseForm.Code)" />
+            </div>
+
+            <div class="form-field form-field-wide">
+                <label for="course-description">Description</label>
+                <InputTextArea id="course-description" class="form-control" @bind-Value="courseForm.Description" />
+                <ValidationMessage For="@(() => courseForm.Description)" />
+            </div>
+        </div>
+
+        <div class="button-row">
+            <button type="submit" class="btn btn-primary">@(editingCourseId is null ? "Create Course" : "Save Changes")</button>
+
+            @if (editingCourseId is not null)
+            {
+                <button type="button" class="btn btn-secondary" @onclick="CancelEdit">Cancel</button>
+            }
+        </div>
+    </EditForm>
+</section>
+
+<section class="crud-panel">
+    <div class="section-header">
+        <h2>Courses</h2>
+        <span class="record-count">@courses.Count course(s)</span>
+    </div>
+
+    @if (isLoading)
+    {
+        <p><em>Loading courses...</em></p>
+    }
+    else if (courses.Count == 0)
+    {
+        <div class="empty-state">
+            No courses exist yet. Use the form above to create the first course.
+        </div>
+    }
+    else
+    {
+        <table class="table table-striped course-table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Code</th>
+                    <th>Assignments</th>
+                    <th>Updated</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var course in courses)
+                {
+                    <tr>
+                        <td>
+                            <strong>@course.Name</strong>
+                            @if (!string.IsNullOrWhiteSpace(course.Description))
+                            {
+                                <div class="muted-text">@course.Description</div>
+                            }
+                        </td>
+                        <td>@(string.IsNullOrWhiteSpace(course.Code) ? "—" : course.Code)</td>
+                        <td>@course.Assignments.Count</td>
+                        <td>@course.UpdatedAt.ToLocalTime().ToString("yyyy-MM-dd")</td>
+                        <td>
+                            <a class="btn btn-sm btn-outline-primary" href="@($"/courses/{course.Id}")">Details</a>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="() => BeginEdit(course)">Edit</button>
+                            <button type="button" class="btn btn-sm btn-outline-danger" @onclick="() => DeleteCourseAsync(course.Id)">Delete</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</section>
+
+@code {
+    private List<Course> courses = new();
+    private CourseForm courseForm = new();
+    private int? editingCourseId;
+    private bool isLoading = true;
+    private string? successMessage;
+    private string? errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadCoursesAsync();
+    }
+
+    private async Task LoadCoursesAsync()
+    {
+        isLoading = true;
+        courses = await CourseService.GetCoursesAsync();
+        isLoading = false;
+    }
+
+    private async Task SaveCourseAsync()
+    {
+        ClearMessages();
+
+        var course = new Course
+        {
+            Id = editingCourseId ?? 0,
+            Name = courseForm.Name.Trim(),
+            Code = string.IsNullOrWhiteSpace(courseForm.Code) ? null : courseForm.Code.Trim(),
+            Description = string.IsNullOrWhiteSpace(courseForm.Description) ? null : courseForm.Description.Trim()
+        };
+
+        if (editingCourseId is null)
+        {
+            await CourseService.CreateCourseAsync(course);
+            successMessage = "Course created successfully.";
+        }
+        else
+        {
+            var updated = await CourseService.UpdateCourseAsync(course);
+
+            if (!updated)
+            {
+                errorMessage = "The selected course could not be found.";
+                await LoadCoursesAsync();
+                return;
+            }
+
+            successMessage = "Course updated successfully.";
+        }
+
+        courseForm = new CourseForm();
+        editingCourseId = null;
+        await LoadCoursesAsync();
+    }
+
+    private void BeginEdit(Course course)
+    {
+        ClearMessages();
+
+        editingCourseId = course.Id;
+        courseForm = new CourseForm
+        {
+            Name = course.Name,
+            Code = course.Code,
+            Description = course.Description
+        };
+    }
+
+    private void CancelEdit()
+    {
+        ClearMessages();
+
+        editingCourseId = null;
+        courseForm = new CourseForm();
+    }
+
+    private async Task DeleteCourseAsync(int id)
+    {
+        ClearMessages();
+
+        var deleted = await CourseService.DeleteCourseAsync(id);
+
+        if (deleted)
+        {
+            successMessage = "Course deleted successfully.";
+        }
+        else
+        {
+            errorMessage = "The selected course could not be found.";
+        }
+
+        await LoadCoursesAsync();
+    }
+
+    private void ClearMessages()
+    {
+        successMessage = null;
+        errorMessage = null;
+    }
+
+    private sealed class CourseForm
+    {
+        [Required(ErrorMessage = "Course name is required.")]
+        [StringLength(80, MinimumLength = 2, ErrorMessage = "Course name must be between 2 and 80 characters.")]
+        public string Name { get; set; } = string.Empty;
+
+        [StringLength(20, ErrorMessage = "Course code must be 20 characters or fewer.")]
+        public string? Code { get; set; }
+
+        [StringLength(250, ErrorMessage = "Course description must be 250 characters or fewer.")]
+        public string? Description { get; set; }
+    }
+}

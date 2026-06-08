@@ -1,0 +1,80 @@
+@page "/courses/{CourseId:int}"
+@using StudyTrack.Models
+@using StudyTrack.Services
+@inject CourseService CourseService
+
+<PageTitle>Course Details</PageTitle>
+
+@if (isLoading)
+{
+    <p><em>Loading course details...</em></p>
+}
+else if (course is null)
+{
+    <h1>Course Not Found</h1>
+    <div class="alert alert-warning" role="alert">
+        The requested course could not be found. It may have been deleted.
+    </div>
+    <a class="btn btn-primary" href="/courses">Back to Courses</a>
+}
+else
+{
+    <h1>@course.Name</h1>
+
+    <div class="details-panel">
+        <p><strong>Code:</strong> @(string.IsNullOrWhiteSpace(course.Code) ? "—" : course.Code)</p>
+        <p><strong>Description:</strong> @(string.IsNullOrWhiteSpace(course.Description) ? "No description provided." : course.Description)</p>
+        <p><strong>Created:</strong> @course.CreatedAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</p>
+        <p><strong>Updated:</strong> @course.UpdatedAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</p>
+    </div>
+
+    <h2>Connected Assignments</h2>
+
+    @if (course.Assignments.Count == 0)
+    {
+        <div class="empty-state">
+            No assignments are currently connected to this course.
+        </div>
+    }
+    else
+    {
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Assignment</th>
+                    <th>Due Date</th>
+                    <th>Priority</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var assignment in course.Assignments)
+                {
+                    <tr>
+                        <td>@assignment.Title</td>
+                        <td>@assignment.DueDate.ToString("yyyy-MM-dd")</td>
+                        <td>@assignment.Priority</td>
+                        <td>@assignment.Status</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+
+    <a class="btn btn-primary" href="/courses">Back to Courses</a>
+}
+
+@code {
+    [Parameter]
+    public int CourseId { get; set; }
+
+    private Course? course;
+    private bool isLoading = true;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        isLoading = true;
+        course = await CourseService.GetCourseByIdAsync(CourseId);
+        isLoading = false;
+    }
+}

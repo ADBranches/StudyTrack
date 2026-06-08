@@ -43,3 +43,16 @@ https://trello.com/b/kXoxNah7
 - `/assignments` — Assignments
 - `/study-sessions` — Study Sessions
 - `/help` — Help and documentation overview
+
+
+## Phase 3 Course Management
+
+Course management now supports:
+
+- Viewing seeded courses
+- Creating courses
+- Editing courses
+- Deleting courses
+- Viewing course details
+- Viewing assignments connected to a course
+- Validation and user feedback

@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using StudyTrack.Components;
 using StudyTrack.Data;
+using StudyTrack.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,6 +10,8 @@ builder.Services.AddRazorComponents()
 
 builder.Services.AddDbContext<StudyTrackDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("StudyTrackDb")));
+
+builder.Services.AddScoped<CourseService>();
 
 var app = builder.Build();
 

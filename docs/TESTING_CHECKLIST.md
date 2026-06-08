@@ -25,3 +25,18 @@
 - [ ] Navigation links are visible
 - [ ] StudyTrack branding is visible
 - [ ] Layout footer is visible
+
+
+## Phase 3 Checks
+
+- [ ] Courses page displays seeded courses
+- [ ] Course create form appears
+- [ ] Course name validation appears when name is missing
+- [ ] New course can be created
+- [ ] Existing course can be edited
+- [ ] Course can be deleted
+- [ ] Course details page opens
+- [ ] Course details page shows connected assignments
+- [ ] Success message appears after create/edit/delete
+- [ ] Friendly not-found message appears for invalid course ID
+- [ ] Project builds successfully
