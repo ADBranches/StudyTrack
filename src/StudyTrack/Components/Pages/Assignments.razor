@@ -1,30 +1,329 @@
 @page "/assignments"
+@rendermode InteractiveServer
+@using System.ComponentModel.DataAnnotations
+@using StudyTrack.Models
+@using StudyTrack.Services
+@inject AssignmentService AssignmentService
+@inject CourseService CourseService
 
 <PageTitle>Assignments</PageTitle>
 
-<h1>Assignments</h1>
+<h1>Assignment Management</h1>
 
 <p class="lead">
-    Assignment management will support creating, viewing, editing, deleting, filtering, and marking assignments complete.
+    Create, view, update, delete, complete, and reopen assignments. Assignments are connected to courses.
 </p>
 
-<table class="table table-striped skeleton-table">
-    <thead>
-        <tr>
-            <th>Assignment</th>
-            <th>Course</th>
-            <th>Due Date</th>
-            <th>Priority</th>
-            <th>Status</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td>Sample Assignment Workflow</td>
-            <td>CSE 325</td>
-            <td>Pending model phase</td>
-            <td>High</td>
-            <td>Planned</td>
-        </tr>
-    </tbody>
-</table>
+@if (!string.IsNullOrWhiteSpace(successMessage))
+{
+    <div class="alert alert-success" role="alert">@successMessage</div>
+}
+
+@if (!string.IsNullOrWhiteSpace(errorMessage))
+{
+    <div class="alert alert-danger" role="alert">@errorMessage</div>
+}
+
+@if (courses.Count == 0 && !isLoading)
+{
+    <div class="alert alert-warning" role="alert">
+        Create at least one course before adding assignments.
+    </div>
+}
+
+<section class="crud-panel">
+    <h2>@(editingAssignmentId is null ? "Add Assignment" : "Edit Assignment")</h2>
+
+    <EditForm Model="assignmentForm" OnValidSubmit="SaveAssignmentAsync">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="form-grid">
+            <div class="form-field">
+                <label for="assignment-title">Title</label>
+                <InputText id="assignment-title" class="form-control" @bind-Value="assignmentForm.Title" />
+                <ValidationMessage For="@(() => assignmentForm.Title)" />
+            </div>
+
+            <div class="form-field">
+                <label for="assignment-course">Course</label>
+                <InputSelect id="assignment-course" class="form-control" @bind-Value="assignmentForm.CourseId">
+                    <option value="0">Select a course</option>
+                    @foreach (var course in courses)
+                    {
+                        <option value="@course.Id">@course.Name</option>
+                    }
+                </InputSelect>
+                <ValidationMessage For="@(() => assignmentForm.CourseId)" />
+            </div>
+
+            <div class="form-field">
+                <label for="assignment-due-date">Due Date</label>
+                <InputDate id="assignment-due-date" class="form-control" @bind-Value="assignmentForm.DueDate" />
+                <ValidationMessage For="@(() => assignmentForm.DueDate)" />
+            </div>
+
+            <div class="form-field">
+                <label for="assignment-priority">Priority</label>
+                <InputSelect id="assignment-priority" class="form-control" @bind-Value="assignmentForm.Priority">
+                    <option value="@AssignmentPriority.Low">Low</option>
+                    <option value="@AssignmentPriority.Medium">Medium</option>
+                    <option value="@AssignmentPriority.High">High</option>
+                </InputSelect>
+            </div>
+
+            <div class="form-field">
+                <label for="assignment-status">Status</label>
+                <InputSelect id="assignment-status" class="form-control" @bind-Value="assignmentForm.Status">
+                    <option value="@AssignmentStatus.Pending">Pending</option>
+                    <option value="@AssignmentStatus.InProgress">In Progress</option>
+                    <option value="@AssignmentStatus.Completed">Completed</option>
+                    <option value="@AssignmentStatus.Overdue">Overdue</option>
+                </InputSelect>
+            </div>
+
+            <div class="form-field form-field-wide">
+                <label for="assignment-description">Description</label>
+                <InputTextArea id="assignment-description" class="form-control" @bind-Value="assignmentForm.Description" />
+                <ValidationMessage For="@(() => assignmentForm.Description)" />
+            </div>
+        </div>
+
+        <div class="button-row">
+            <button type="submit" class="btn btn-primary" disabled="@(courses.Count == 0)">
+                @(editingAssignmentId is null ? "Create Assignment" : "Save Changes")
+            </button>
+
+            @if (editingAssignmentId is not null)
+            {
+                <button type="button" class="btn btn-secondary" @onclick="CancelEdit">Cancel</button>
+            }
+        </div>
+    </EditForm>
+</section>
+
+<section class="crud-panel">
+    <div class="section-header">
+        <h2>Assignments</h2>
+        <span class="record-count">@assignments.Count assignment(s)</span>
+    </div>
+
+    @if (isLoading)
+    {
+        <p><em>Loading assignments...</em></p>
+    }
+    else if (assignments.Count == 0)
+    {
+        <div class="empty-state">
+            No assignments exist yet. Use the form above to create the first assignment.
+        </div>
+    }
+    else
+    {
+        <table class="table table-striped assignment-table">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Course</th>
+                    <th>Due Date</th>
+                    <th>Priority</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var assignment in assignments)
+                {
+                    <tr>
+                        <td>
+                            <strong>@assignment.Title</strong>
+                            @if (!string.IsNullOrWhiteSpace(assignment.Description))
+                            {
+                                <div class="muted-text">@assignment.Description</div>
+                            }
+                        </td>
+                        <td>@(assignment.Course?.Name ?? "No course")</td>
+                        <td>@assignment.DueDate.ToString("yyyy-MM-dd")</td>
+                        <td><PriorityBadge Priority="assignment.Priority" /></td>
+                        <td><StatusBadge Status="assignment.Status" /></td>
+                        <td>
+                            <a class="btn btn-sm btn-outline-primary" href="@($"/assignments/{assignment.Id}")">Details</a>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="() => BeginEdit(assignment)">Edit</button>
+
+                            @if (assignment.Status == AssignmentStatus.Completed)
+                            {
+                                <button type="button" class="btn btn-sm btn-outline-warning" @onclick="() => ReopenAssignmentAsync(assignment.Id)">Reopen</button>
+                            }
+                            else
+                            {
+                                <button type="button" class="btn btn-sm btn-outline-success" @onclick="() => MarkCompletedAsync(assignment.Id)">Complete</button>
+                            }
+
+                            <button type="button" class="btn btn-sm btn-outline-danger" @onclick="() => DeleteAssignmentAsync(assignment.Id)">Delete</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</section>
+
+@code {
+    private List<AssignmentTask> assignments = new();
+    private List<Course> courses = new();
+    private AssignmentForm assignmentForm = new();
+    private int? editingAssignmentId;
+    private bool isLoading = true;
+    private string? successMessage;
+    private string? errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadDataAsync();
+    }
+
+    private async Task LoadDataAsync()
+    {
+        isLoading = true;
+        courses = await CourseService.GetCoursesAsync();
+        assignments = await AssignmentService.GetAssignmentsAsync();
+
+        if (assignmentForm.CourseId == 0 && courses.Count > 0)
+        {
+            assignmentForm.CourseId = courses[0].Id;
+        }
+
+        isLoading = false;
+    }
+
+    private async Task SaveAssignmentAsync()
+    {
+        ClearMessages();
+
+        var assignment = new AssignmentTask
+        {
+            Id = editingAssignmentId ?? 0,
+            Title = assignmentForm.Title.Trim(),
+            Description = string.IsNullOrWhiteSpace(assignmentForm.Description) ? null : assignmentForm.Description.Trim(),
+            CourseId = assignmentForm.CourseId,
+            DueDate = assignmentForm.DueDate.Date,
+            Priority = assignmentForm.Priority,
+            Status = assignmentForm.Status
+        };
+
+        if (editingAssignmentId is null)
+        {
+            await AssignmentService.CreateAssignmentAsync(assignment);
+            successMessage = "Assignment created successfully.";
+        }
+        else
+        {
+            var updated = await AssignmentService.UpdateAssignmentAsync(assignment);
+
+            if (!updated)
+            {
+                errorMessage = "The selected assignment could not be found.";
+                await LoadDataAsync();
+                return;
+            }
+
+            successMessage = "Assignment updated successfully.";
+        }
+
+        ResetForm();
+        await LoadDataAsync();
+    }
+
+    private void BeginEdit(AssignmentTask assignment)
+    {
+        ClearMessages();
+
+        editingAssignmentId = assignment.Id;
+        assignmentForm = new AssignmentForm
+        {
+            Title = assignment.Title,
+            Description = assignment.Description,
+            CourseId = assignment.CourseId,
+            DueDate = assignment.DueDate.Date,
+            Priority = assignment.Priority,
+            Status = assignment.Status
+        };
+    }
+
+    private void CancelEdit()
+    {
+        ClearMessages();
+        ResetForm();
+    }
+
+    private async Task DeleteAssignmentAsync(int id)
+    {
+        ClearMessages();
+
+        var deleted = await AssignmentService.DeleteAssignmentAsync(id);
+
+        successMessage = deleted ? "Assignment deleted successfully." : null;
+        errorMessage = deleted ? null : "The selected assignment could not be found.";
+
+        await LoadDataAsync();
+    }
+
+    private async Task MarkCompletedAsync(int id)
+    {
+        ClearMessages();
+
+        var completed = await AssignmentService.MarkCompletedAsync(id);
+
+        successMessage = completed ? "Assignment marked as completed." : null;
+        errorMessage = completed ? null : "The selected assignment could not be found.";
+
+        await LoadDataAsync();
+    }
+
+    private async Task ReopenAssignmentAsync(int id)
+    {
+        ClearMessages();
+
+        var reopened = await AssignmentService.ReopenAssignmentAsync(id);
+
+        successMessage = reopened ? "Assignment reopened successfully." : null;
+        errorMessage = reopened ? null : "The selected assignment could not be found.";
+
+        await LoadDataAsync();
+    }
+
+    private void ResetForm()
+    {
+        editingAssignmentId = null;
+        assignmentForm = new AssignmentForm
+        {
+            CourseId = courses.FirstOrDefault()?.Id ?? 0
+        };
+    }
+
+    private void ClearMessages()
+    {
+        successMessage = null;
+        errorMessage = null;
+    }
+
+    private sealed class AssignmentForm
+    {
+        [Required(ErrorMessage = "Assignment title is required.")]
+        [StringLength(120, MinimumLength = 2, ErrorMessage = "Assignment title must be between 2 and 120 characters.")]
+        public string Title { get; set; } = string.Empty;
+
+        [StringLength(500, ErrorMessage = "Assignment description must be 500 characters or fewer.")]
+        public string? Description { get; set; }
+
+        [Range(1, int.MaxValue, ErrorMessage = "A course must be selected.")]
+        public int CourseId { get; set; }
+
+        [Required]
+        public DateTime DueDate { get; set; } = DateTime.Today.AddDays(7);
+
+        public AssignmentPriority Priority { get; set; } = AssignmentPriority.Medium;
+
+        public AssignmentStatus Status { get; set; } = AssignmentStatus.Pending;
+    }
+}

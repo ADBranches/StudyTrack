@@ -1,0 +1,23 @@
+@using StudyTrack.Models
+
+<span class="@CssClass">@DisplayText</span>
+
+@code {
+    [Parameter]
+    public AssignmentStatus Status { get; set; }
+
+    private string DisplayText => Status switch
+    {
+        AssignmentStatus.InProgress => "In Progress",
+        _ => Status.ToString()
+    };
+
+    private string CssClass => Status switch
+    {
+        AssignmentStatus.Pending => "badge badge-status badge-pending",
+        AssignmentStatus.InProgress => "badge badge-status badge-progress",
+        AssignmentStatus.Completed => "badge badge-status badge-completed",
+        AssignmentStatus.Overdue => "badge badge-status badge-overdue",
+        _ => "badge badge-status"
+    };
+}

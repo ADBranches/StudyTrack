@@ -40,3 +40,21 @@
 - [ ] Success message appears after create/edit/delete
 - [ ] Friendly not-found message appears for invalid course ID
 - [ ] Project builds successfully
+
+
+## Phase 4 Checks
+
+- [ ] Assignments page displays seeded assignments
+- [ ] Assignment create form appears
+- [ ] Assignment title validation appears when title is missing
+- [ ] Course selection validation appears when no course is selected
+- [ ] New assignment can be created
+- [ ] Existing assignment can be edited
+- [ ] Assignment can be deleted
+- [ ] Assignment can be marked completed
+- [ ] Completed assignment can be reopened
+- [ ] Assignment details page opens
+- [ ] Assignment details page shows course, priority, status, and study sessions
+- [ ] Friendly not-found message appears for invalid assignment ID
+- [ ] Status and priority badges display clearly
+- [ ] Project builds successfully

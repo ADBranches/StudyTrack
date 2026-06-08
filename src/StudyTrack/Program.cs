@@ -12,6 +12,7 @@ builder.Services.AddDbContext<StudyTrackDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("StudyTrackDb")));
 
 builder.Services.AddScoped<CourseService>();
+builder.Services.AddScoped<AssignmentService>();
 
 var app = builder.Build();
 

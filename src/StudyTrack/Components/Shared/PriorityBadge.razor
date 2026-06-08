@@ -1,0 +1,16 @@
+@using StudyTrack.Models
+
+<span class="@CssClass">@Priority</span>
+
+@code {
+    [Parameter]
+    public AssignmentPriority Priority { get; set; }
+
+    private string CssClass => Priority switch
+    {
+        AssignmentPriority.Low => "badge badge-priority badge-low",
+        AssignmentPriority.Medium => "badge badge-priority badge-medium",
+        AssignmentPriority.High => "badge badge-priority badge-high",
+        _ => "badge badge-priority"
+    };
+}

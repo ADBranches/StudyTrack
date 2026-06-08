@@ -56,3 +56,19 @@ Course management now supports:
 - Viewing course details
 - Viewing assignments connected to a course
 - Validation and user feedback
+
+
+## Phase 4 Assignment Management
+
+Assignment management now supports:
+
+- Viewing seeded assignments
+- Creating assignments
+- Editing assignments
+- Deleting assignments
+- Marking assignments complete
+- Reopening completed assignments
+- Viewing assignment details
+- Viewing study sessions connected to an assignment
+- Displaying status and priority badges
+- Validation and user feedback

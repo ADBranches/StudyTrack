@@ -118,3 +118,54 @@
 .course-table .btn {
     margin: 0.15rem;
 }
+
+.assignment-table td {
+    vertical-align: middle;
+}
+
+.assignment-table .btn {
+    margin: 0.15rem;
+}
+
+.badge {
+    display: inline-block;
+    padding: 0.35rem 0.55rem;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    font-weight: 700;
+}
+
+.badge-pending {
+    background: #e9ecef;
+    color: #343a40;
+}
+
+.badge-progress {
+    background: #cfe2ff;
+    color: #084298;
+}
+
+.badge-completed {
+    background: #d1e7dd;
+    color: #0f5132;
+}
+
+.badge-overdue {
+    background: #f8d7da;
+    color: #842029;
+}
+
+.badge-low {
+    background: #e2e3e5;
+    color: #41464b;
+}
+
+.badge-medium {
+    background: #fff3cd;
+    color: #664d03;
+}
+
+.badge-high {
+    background: #f8d7da;
+    color: #842029;
+}

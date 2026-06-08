@@ -1,0 +1,88 @@
+@page "/assignments/{AssignmentId:int}"
+@using StudyTrack.Models
+@using StudyTrack.Services
+@inject AssignmentService AssignmentService
+
+<PageTitle>Assignment Details</PageTitle>
+
+@if (isLoading)
+{
+    <p><em>Loading assignment details...</em></p>
+}
+else if (assignment is null)
+{
+    <h1>Assignment Not Found</h1>
+    <div class="alert alert-warning" role="alert">
+        The requested assignment could not be found. It may have been deleted.
+    </div>
+    <a class="btn btn-primary" href="/assignments">Back to Assignments</a>
+}
+else
+{
+    <h1>@assignment.Title</h1>
+
+    <div class="details-panel">
+        <p><strong>Course:</strong> @(assignment.Course?.Name ?? "No course")</p>
+        <p><strong>Description:</strong> @(string.IsNullOrWhiteSpace(assignment.Description) ? "No description provided." : assignment.Description)</p>
+        <p><strong>Due Date:</strong> @assignment.DueDate.ToString("yyyy-MM-dd")</p>
+        <p><strong>Priority:</strong> <PriorityBadge Priority="assignment.Priority" /></p>
+        <p><strong>Status:</strong> <StatusBadge Status="assignment.Status" /></p>
+        <p><strong>Created:</strong> @assignment.CreatedAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</p>
+        <p><strong>Updated:</strong> @assignment.UpdatedAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</p>
+
+        @if (assignment.CompletedAt is not null)
+        {
+            <p><strong>Completed:</strong> @assignment.CompletedAt.Value.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</p>
+        }
+    </div>
+
+    <h2>Study Sessions</h2>
+
+    @if (assignment.StudySessions.Count == 0)
+    {
+        <div class="empty-state">
+            No study sessions are currently connected to this assignment.
+        </div>
+    }
+    else
+    {
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Planned Date</th>
+                    <th>Duration</th>
+                    <th>Completed</th>
+                    <th>Notes</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var session in assignment.StudySessions)
+                {
+                    <tr>
+                        <td>@session.PlannedDate.ToString("yyyy-MM-dd HH:mm")</td>
+                        <td>@session.DurationMinutes minutes</td>
+                        <td>@(session.IsCompleted ? "Yes" : "No")</td>
+                        <td>@(string.IsNullOrWhiteSpace(session.Notes) ? "—" : session.Notes)</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+
+    <a class="btn btn-primary" href="/assignments">Back to Assignments</a>
+}
+
+@code {
+    [Parameter]
+    public int AssignmentId { get; set; }
+
+    private AssignmentTask? assignment;
+    private bool isLoading = true;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        isLoading = true;
+        assignment = await AssignmentService.GetAssignmentByIdAsync(AssignmentId);
+        isLoading = false;
+    }
+}
