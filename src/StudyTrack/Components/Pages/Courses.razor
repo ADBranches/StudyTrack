@@ -51,7 +51,9 @@
         </div>
 
         <div class="button-row">
-            <button type="submit" class="btn btn-primary">@(editingCourseId is null ? "Create Course" : "Save Changes")</button>
+            <button type="submit" class="btn btn-primary">
+                @(editingCourseId is null ? "Create Course" : "Save Changes")
+            </button>
 
             @if (editingCourseId is not null)
             {
@@ -106,7 +108,16 @@
                         <td>
                             <a class="btn btn-sm btn-outline-primary" href="@($"/courses/{course.Id}")">Details</a>
                             <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="() => BeginEdit(course)">Edit</button>
-                            <button type="button" class="btn btn-sm btn-outline-danger" @onclick="() => DeleteCourseAsync(course.Id)">Delete</button>
+
+                            @if (pendingDeleteCourseId == course.Id)
+                            {
+                                <button type="button" class="btn btn-sm btn-danger" @onclick="() => DeleteCourseAsync(course.Id)">Confirm Delete</button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary" @onclick="CancelDelete">Cancel</button>
+                            }
+                            else
+                            {
+                                <button type="button" class="btn btn-sm btn-outline-danger" @onclick="() => RequestDelete(course.Id)">Delete</button>
+                            }
                         </td>
                     </tr>
                 }
@@ -119,6 +130,7 @@
     private List<Course> courses = new();
     private CourseForm courseForm = new();
     private int? editingCourseId;
+    private int? pendingDeleteCourseId;
     private bool isLoading = true;
     private string? successMessage;
     private string? errorMessage;
@@ -168,6 +180,7 @@
 
         courseForm = new CourseForm();
         editingCourseId = null;
+        pendingDeleteCourseId = null;
         await LoadCoursesAsync();
     }
 
@@ -176,6 +189,7 @@
         ClearMessages();
 
         editingCourseId = course.Id;
+        pendingDeleteCourseId = null;
         courseForm = new CourseForm
         {
             Name = course.Name,
@@ -190,6 +204,21 @@
 
         editingCourseId = null;
         courseForm = new CourseForm();
+    }
+
+    private void RequestDelete(int id)
+    {
+        ClearMessages();
+        editingCourseId = null;
+        courseForm = new CourseForm();
+        pendingDeleteCourseId = id;
+        errorMessage = "Delete requested. Click Confirm Delete to permanently remove this course.";
+    }
+
+    private void CancelDelete()
+    {
+        ClearMessages();
+        pendingDeleteCourseId = null;
     }
 
     private async Task DeleteCourseAsync(int id)
@@ -207,6 +236,7 @@
             errorMessage = "The selected course could not be found.";
         }
 
+        pendingDeleteCourseId = null;
         await LoadCoursesAsync();
     }
 
