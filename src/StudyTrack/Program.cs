@@ -14,6 +14,7 @@ builder.Services.AddDbContext<StudyTrackDbContext>(options =>
 builder.Services.AddScoped<CourseService>();
 builder.Services.AddScoped<AssignmentService>();
 builder.Services.AddScoped<DashboardService>();
+builder.Services.AddScoped<StudySessionService>();
 
 var app = builder.Build();
 

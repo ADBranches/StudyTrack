@@ -1,20 +1,264 @@
 @page "/study-sessions"
+@rendermode InteractiveServer
+@using System.ComponentModel.DataAnnotations
+@using StudyTrack.Models
+@using StudyTrack.Services
+@inject StudySessionService StudySessionService
+@inject AssignmentService AssignmentService
 
 <PageTitle>Study Sessions</PageTitle>
 
-<h1>Study Sessions</h1>
+<h1>Study Session Planning</h1>
 
 <p class="lead">
-    Study sessions will help students plan focused time for assignments and track preparation progress.
+    Plan focused study time by linking study sessions to assignments.
 </p>
 
-<div class="placeholder-panel">
-    <h2>Planned Study Session Actions</h2>
-    <ul>
-        <li>Create a study session</li>
-        <li>Link a study session to an assignment</li>
-        <li>Add planned date and duration</li>
-        <li>Add notes</li>
-        <li>Mark study session complete</li>
-    </ul>
-</div>
+@if (!string.IsNullOrWhiteSpace(successMessage))
+{
+    <div class="alert alert-success" role="alert">@successMessage</div>
+}
+
+@if (!string.IsNullOrWhiteSpace(errorMessage))
+{
+    <div class="alert alert-danger" role="alert">@errorMessage</div>
+}
+
+@if (assignments.Count == 0 && !isLoading)
+{
+    <div class="alert alert-warning" role="alert">
+        Create at least one assignment before planning study sessions.
+    </div>
+}
+
+<section class="crud-panel study-session-form-panel">
+    <h2>Add Study Session</h2>
+
+    <EditForm Model="sessionForm" OnValidSubmit="CreateSessionAsync">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="form-grid">
+            <div class="form-field form-field-wide">
+                <label for="session-assignment">Assignment</label>
+                <InputSelect id="session-assignment" class="form-control" @bind-Value="sessionForm.AssignmentTaskId">
+                    <option value="0">Select an assignment</option>
+                    @foreach (var assignment in assignments)
+                    {
+                        <option value="@assignment.Id">@assignment.Title (@(assignment.Course?.Name ?? "No course"))</option>
+                    }
+                </InputSelect>
+                <ValidationMessage For="@(() => sessionForm.AssignmentTaskId)" />
+            </div>
+
+            <div class="form-field">
+                <label for="planned-date">Planned Date</label>
+                <InputDate id="planned-date" class="form-control" @bind-Value="sessionForm.PlannedDate" />
+                <ValidationMessage For="@(() => sessionForm.PlannedDate)" />
+            </div>
+
+            <div class="form-field">
+                <label for="duration-minutes">Duration Minutes</label>
+                <InputNumber id="duration-minutes" class="form-control" @bind-Value="sessionForm.DurationMinutes" />
+                <ValidationMessage For="@(() => sessionForm.DurationMinutes)" />
+            </div>
+
+            <div class="form-field form-field-wide">
+                <label for="session-notes">Notes</label>
+                <InputTextArea id="session-notes" class="form-control" @bind-Value="sessionForm.Notes" />
+                <ValidationMessage For="@(() => sessionForm.Notes)" />
+            </div>
+        </div>
+
+        <div class="button-row">
+            <button type="submit" class="btn btn-primary" disabled="@(assignments.Count == 0)">Create Study Session</button>
+        </div>
+    </EditForm>
+</section>
+
+<section class="crud-panel">
+    <div class="section-header">
+        <h2>Planned Study Sessions</h2>
+        <span class="record-count">@studySessions.Count session(s)</span>
+    </div>
+
+    @if (isLoading)
+    {
+        <p><em>Loading study sessions...</em></p>
+    }
+    else if (studySessions.Count == 0)
+    {
+        <div class="empty-state">
+            No study sessions exist yet. Use the form above to plan the first session.
+        </div>
+    }
+    else
+    {
+        <table class="table table-striped study-session-table">
+            <thead>
+                <tr>
+                    <th>Assignment</th>
+                    <th>Course</th>
+                    <th>Planned Date</th>
+                    <th>Duration</th>
+                    <th>Status</th>
+                    <th>Notes</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var session in studySessions)
+                {
+                    <tr>
+                        <td>
+                            <a href="@($"/assignments/{session.AssignmentTaskId}")">
+                                @(session.AssignmentTask?.Title ?? "Assignment not found")
+                            </a>
+                        </td>
+                        <td>@(session.AssignmentTask?.Course?.Name ?? "No course")</td>
+                        <td>@session.PlannedDate.ToString("yyyy-MM-dd")</td>
+                        <td>@session.DurationMinutes minutes</td>
+                        <td>
+                            @if (session.IsCompleted)
+                            {
+                                <span class="badge badge-status badge-completed">Completed</span>
+                            }
+                            else
+                            {
+                                <span class="badge badge-status badge-pending">Planned</span>
+                            }
+                        </td>
+                        <td>@(string.IsNullOrWhiteSpace(session.Notes) ? "—" : session.Notes)</td>
+                        <td>
+                            @if (session.IsCompleted)
+                            {
+                                <button type="button" class="btn btn-sm btn-outline-warning" @onclick="() => ReopenSessionAsync(session.Id)">Reopen</button>
+                            }
+                            else
+                            {
+                                <button type="button" class="btn btn-sm btn-outline-success" @onclick="() => MarkSessionCompletedAsync(session.Id)">Complete</button>
+                            }
+
+                            <button type="button" class="btn btn-sm btn-outline-danger" @onclick="() => DeleteSessionAsync(session.Id)">Delete</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</section>
+
+@code {
+    private List<StudySession> studySessions = new();
+    private List<AssignmentTask> assignments = new();
+    private StudySessionForm sessionForm = new();
+    private bool isLoading = true;
+    private string? successMessage;
+    private string? errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadDataAsync();
+    }
+
+    private async Task LoadDataAsync()
+    {
+        isLoading = true;
+
+        assignments = await AssignmentService.GetAssignmentsAsync();
+        studySessions = await StudySessionService.GetStudySessionsAsync();
+
+        if (sessionForm.AssignmentTaskId == 0 && assignments.Count > 0)
+        {
+            sessionForm.AssignmentTaskId = assignments[0].Id;
+        }
+
+        isLoading = false;
+    }
+
+    private async Task CreateSessionAsync()
+    {
+        ClearMessages();
+
+        var session = new StudySession
+        {
+            AssignmentTaskId = sessionForm.AssignmentTaskId,
+            PlannedDate = sessionForm.PlannedDate.Date,
+            DurationMinutes = sessionForm.DurationMinutes,
+            Notes = string.IsNullOrWhiteSpace(sessionForm.Notes) ? null : sessionForm.Notes.Trim(),
+            IsCompleted = false
+        };
+
+        await StudySessionService.CreateStudySessionAsync(session);
+
+        successMessage = "Study session created successfully.";
+        ResetForm();
+
+        await LoadDataAsync();
+    }
+
+    private async Task MarkSessionCompletedAsync(int id)
+    {
+        ClearMessages();
+
+        var completed = await StudySessionService.MarkCompletedAsync(id);
+
+        successMessage = completed ? "Study session marked as completed." : null;
+        errorMessage = completed ? null : "The selected study session could not be found.";
+
+        await LoadDataAsync();
+    }
+
+    private async Task ReopenSessionAsync(int id)
+    {
+        ClearMessages();
+
+        var reopened = await StudySessionService.ReopenAsync(id);
+
+        successMessage = reopened ? "Study session reopened successfully." : null;
+        errorMessage = reopened ? null : "The selected study session could not be found.";
+
+        await LoadDataAsync();
+    }
+
+    private async Task DeleteSessionAsync(int id)
+    {
+        ClearMessages();
+
+        var deleted = await StudySessionService.DeleteStudySessionAsync(id);
+
+        successMessage = deleted ? "Study session deleted successfully." : null;
+        errorMessage = deleted ? null : "The selected study session could not be found.";
+
+        await LoadDataAsync();
+    }
+
+    private void ResetForm()
+    {
+        sessionForm = new StudySessionForm
+        {
+            AssignmentTaskId = assignments.FirstOrDefault()?.Id ?? 0
+        };
+    }
+
+    private void ClearMessages()
+    {
+        successMessage = null;
+        errorMessage = null;
+    }
+
+    private sealed class StudySessionForm
+    {
+        [Range(1, int.MaxValue, ErrorMessage = "An assignment must be selected.")]
+        public int AssignmentTaskId { get; set; }
+
+        [Required]
+        public DateTime PlannedDate { get; set; } = DateTime.Today.AddDays(1);
+
+        [Range(1, 600, ErrorMessage = "Duration must be between 1 and 600 minutes.")]
+        public int DurationMinutes { get; set; } = 60;
+
+        [StringLength(500, ErrorMessage = "Notes must be 500 characters or fewer.")]
+        public string? Notes { get; set; }
+    }
+}

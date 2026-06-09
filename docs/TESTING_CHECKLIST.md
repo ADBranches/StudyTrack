@@ -88,3 +88,20 @@
 - [ ] Filters can be cleared
 - [ ] Filtered assignment results remain linked to assignment details
 - [ ] Project builds successfully
+
+
+## Phase 7 Checks
+
+- [ ] Study Sessions page opens
+- [ ] Study session create form appears
+- [ ] Assignment dropdown displays assignments
+- [ ] Planned date field appears
+- [ ] Duration field validates values between 1 and 600
+- [ ] Notes field appears
+- [ ] New study session can be created
+- [ ] Study sessions display in a list
+- [ ] Study sessions link back to assignment details
+- [ ] Study session can be marked complete
+- [ ] Completed study session can be reopened
+- [ ] Study session can be deleted
+- [ ] Project builds successfully

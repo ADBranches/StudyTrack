@@ -102,3 +102,17 @@ Assignment filtering and sorting now supports:
 - Sort by course
 - Sort by status
 - Clear filters
+
+
+## Phase 7 Study Session Planning
+
+Study session planning now supports:
+
+- Creating study sessions
+- Linking sessions to assignments
+- Setting planned dates
+- Adding duration in minutes
+- Adding notes
+- Marking sessions complete
+- Reopening sessions
+- Deleting sessions

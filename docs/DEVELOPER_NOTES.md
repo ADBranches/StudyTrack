@@ -36,3 +36,8 @@ Phase 5 implements dashboard summary views. DashboardService calculates assignme
 ## Phase 6 Notes
 
 Phase 6 adds filtering and sorting to assignment management. Users can filter assignments by course, status, and priority. Users can sort assignments by due date, priority, course, or status. Filters can be cleared from the assignment page.
+
+
+## Phase 7 Notes
+
+Phase 7 implements study session planning. StudySessionService handles create, list, complete, reopen, and delete operations. StudySessions.razor lets users link sessions to assignments, set planned dates, add durations, add notes, and track completion.
