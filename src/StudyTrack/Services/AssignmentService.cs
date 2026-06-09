@@ -51,6 +51,11 @@ public class AssignmentService
 
     public async Task<AssignmentTask?> GetAssignmentByIdAsync(int id)
     {
+        if (id <= 0)
+        {
+            return null;
+        }
+
         return await _context.AssignmentTasks
             .Include(assignment => assignment.Course)
             .Include(assignment => assignment.StudySessions.OrderBy(session => session.PlannedDate))
@@ -59,6 +64,18 @@ public class AssignmentService
 
     public async Task<AssignmentTask> CreateAssignmentAsync(AssignmentTask assignment)
     {
+        if (string.IsNullOrWhiteSpace(assignment.Title))
+        {
+            throw new ArgumentException("Assignment title is required.", nameof(assignment));
+        }
+
+        if (assignment.CourseId <= 0)
+        {
+            throw new ArgumentException("A valid course is required.", nameof(assignment));
+        }
+
+        assignment.Title = assignment.Title.Trim();
+        assignment.Description = string.IsNullOrWhiteSpace(assignment.Description) ? null : assignment.Description.Trim();
         assignment.CreatedAt = DateTime.UtcNow;
         assignment.UpdatedAt = DateTime.UtcNow;
 
@@ -75,6 +92,11 @@ public class AssignmentService
 
     public async Task<bool> UpdateAssignmentAsync(AssignmentTask updatedAssignment)
     {
+        if (updatedAssignment.Id <= 0 || string.IsNullOrWhiteSpace(updatedAssignment.Title) || updatedAssignment.CourseId <= 0)
+        {
+            return false;
+        }
+
         var existingAssignment = await _context.AssignmentTasks.FindAsync(updatedAssignment.Id);
 
         if (existingAssignment is null)
@@ -82,8 +104,8 @@ public class AssignmentService
             return false;
         }
 
-        existingAssignment.Title = updatedAssignment.Title;
-        existingAssignment.Description = updatedAssignment.Description;
+        existingAssignment.Title = updatedAssignment.Title.Trim();
+        existingAssignment.Description = string.IsNullOrWhiteSpace(updatedAssignment.Description) ? null : updatedAssignment.Description.Trim();
         existingAssignment.DueDate = updatedAssignment.DueDate;
         existingAssignment.Priority = updatedAssignment.Priority;
         existingAssignment.Status = updatedAssignment.Status;
@@ -105,6 +127,11 @@ public class AssignmentService
 
     public async Task<bool> DeleteAssignmentAsync(int id)
     {
+        if (id <= 0)
+        {
+            return false;
+        }
+
         var existingAssignment = await _context.AssignmentTasks.FindAsync(id);
 
         if (existingAssignment is null)
@@ -120,6 +147,11 @@ public class AssignmentService
 
     public async Task<bool> MarkCompletedAsync(int id)
     {
+        if (id <= 0)
+        {
+            return false;
+        }
+
         var existingAssignment = await _context.AssignmentTasks.FindAsync(id);
 
         if (existingAssignment is null)
@@ -137,6 +169,11 @@ public class AssignmentService
 
     public async Task<bool> ReopenAssignmentAsync(int id)
     {
+        if (id <= 0)
+        {
+            return false;
+        }
+
         var existingAssignment = await _context.AssignmentTasks.FindAsync(id);
 
         if (existingAssignment is null)

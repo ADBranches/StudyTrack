@@ -105,3 +105,17 @@
 - [ ] Completed study session can be reopened
 - [ ] Study session can be deleted
 - [ ] Project builds successfully
+
+
+## Phase 8 Checks
+
+- [ ] Course required field validation displays clearly
+- [ ] Assignment required field validation displays clearly
+- [ ] Study session required field validation displays clearly
+- [ ] Friendly not-found page appears for invalid assignment ID
+- [ ] Friendly not-found page appears for invalid course ID
+- [ ] Application Error page is user-friendly
+- [ ] Success feedback appears after create/edit/delete
+- [ ] Error feedback appears when an action cannot be completed
+- [ ] Services include defensive checks for invalid IDs
+- [ ] Project builds successfully

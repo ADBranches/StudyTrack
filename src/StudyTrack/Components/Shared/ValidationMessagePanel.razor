@@ -1,0 +1,31 @@
+@if (!string.IsNullOrWhiteSpace(SuccessMessage))
+{
+    <div class="alert alert-success feedback-panel" role="alert">
+        <strong>Success:</strong> @SuccessMessage
+    </div>
+}
+
+@if (!string.IsNullOrWhiteSpace(ErrorMessage))
+{
+    <div class="alert alert-danger feedback-panel" role="alert">
+        <strong>Error:</strong> @ErrorMessage
+    </div>
+}
+
+@if (!string.IsNullOrWhiteSpace(WarningMessage))
+{
+    <div class="alert alert-warning feedback-panel" role="alert">
+        <strong>Notice:</strong> @WarningMessage
+    </div>
+}
+
+@code {
+    [Parameter]
+    public string? SuccessMessage { get; set; }
+
+    [Parameter]
+    public string? ErrorMessage { get; set; }
+
+    [Parameter]
+    public string? WarningMessage { get; set; }
+}

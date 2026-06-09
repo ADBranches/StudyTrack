@@ -23,6 +23,11 @@ public class CourseService
 
     public async Task<Course?> GetCourseByIdAsync(int id)
     {
+        if (id <= 0)
+        {
+            return null;
+        }
+
         return await _context.Courses
             .Include(course => course.Assignments.OrderBy(assignment => assignment.DueDate))
             .FirstOrDefaultAsync(course => course.Id == id);
@@ -30,6 +35,14 @@ public class CourseService
 
     public async Task<Course> CreateCourseAsync(Course course)
     {
+        if (string.IsNullOrWhiteSpace(course.Name))
+        {
+            throw new ArgumentException("Course name is required.", nameof(course));
+        }
+
+        course.Name = course.Name.Trim();
+        course.Code = string.IsNullOrWhiteSpace(course.Code) ? null : course.Code.Trim();
+        course.Description = string.IsNullOrWhiteSpace(course.Description) ? null : course.Description.Trim();
         course.CreatedAt = DateTime.UtcNow;
         course.UpdatedAt = DateTime.UtcNow;
 
@@ -41,6 +54,11 @@ public class CourseService
 
     public async Task<bool> UpdateCourseAsync(Course updatedCourse)
     {
+        if (updatedCourse.Id <= 0 || string.IsNullOrWhiteSpace(updatedCourse.Name))
+        {
+            return false;
+        }
+
         var existingCourse = await _context.Courses.FindAsync(updatedCourse.Id);
 
         if (existingCourse is null)
@@ -48,9 +66,9 @@ public class CourseService
             return false;
         }
 
-        existingCourse.Name = updatedCourse.Name;
-        existingCourse.Code = updatedCourse.Code;
-        existingCourse.Description = updatedCourse.Description;
+        existingCourse.Name = updatedCourse.Name.Trim();
+        existingCourse.Code = string.IsNullOrWhiteSpace(updatedCourse.Code) ? null : updatedCourse.Code.Trim();
+        existingCourse.Description = string.IsNullOrWhiteSpace(updatedCourse.Description) ? null : updatedCourse.Description.Trim();
         existingCourse.UpdatedAt = DateTime.UtcNow;
 
         await _context.SaveChangesAsync();
@@ -59,6 +77,11 @@ public class CourseService
 
     public async Task<bool> DeleteCourseAsync(int id)
     {
+        if (id <= 0)
+        {
+            return false;
+        }
+
         var existingCourse = await _context.Courses
             .Include(course => course.Assignments)
             .FirstOrDefaultAsync(course => course.Id == id);

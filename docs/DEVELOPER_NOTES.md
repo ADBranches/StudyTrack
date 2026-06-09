@@ -41,3 +41,8 @@ Phase 6 adds filtering and sorting to assignment management. Users can filter as
 ## Phase 7 Notes
 
 Phase 7 implements study session planning. StudySessionService handles create, list, complete, reopen, and delete operations. StudySessions.razor lets users link sessions to assignments, set planned dates, add durations, add notes, and track completion.
+
+
+## Phase 8 Notes
+
+Phase 8 improves validation, error handling, and user feedback. ValidationMessagePanel provides reusable success, error, and warning messages. CourseService and AssignmentService include defensive checks for invalid IDs and required values. Error.razor provides a friendlier fallback error page.

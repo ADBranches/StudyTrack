@@ -15,15 +15,7 @@
     Create, view, update, delete, complete, reopen, filter, and sort assignments.
 </p>
 
-@if (!string.IsNullOrWhiteSpace(successMessage))
-{
-    <div class="alert alert-success" role="alert">@successMessage</div>
-}
-
-@if (!string.IsNullOrWhiteSpace(errorMessage))
-{
-    <div class="alert alert-danger" role="alert">@errorMessage</div>
-}
+<ValidationMessagePanel SuccessMessage="@successMessage" ErrorMessage="@errorMessage" />
 
 @if (courses.Count == 0 && !isLoading)
 {

@@ -13,15 +13,7 @@
     Create, view, update, and delete courses. Courses organize assignments by class or subject.
 </p>
 
-@if (!string.IsNullOrWhiteSpace(successMessage))
-{
-    <div class="alert alert-success" role="alert">@successMessage</div>
-}
-
-@if (!string.IsNullOrWhiteSpace(errorMessage))
-{
-    <div class="alert alert-danger" role="alert">@errorMessage</div>
-}
+<ValidationMessagePanel SuccessMessage="@successMessage" ErrorMessage="@errorMessage" />
 
 <section class="crud-panel">
     <h2>@(editingCourseId is null ? "Add Course" : "Edit Course")</h2>

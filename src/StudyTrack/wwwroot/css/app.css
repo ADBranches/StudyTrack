@@ -267,3 +267,23 @@
 .study-session-table .btn {
     margin: 0.15rem;
 }
+
+.feedback-panel {
+    border-radius: 0.65rem;
+    margin-bottom: 1rem;
+}
+
+.validation-message {
+    color: #842029;
+    font-weight: 600;
+    margin-top: 0.25rem;
+}
+
+.validation-summary-errors {
+    border: 1px solid #f5c2c7;
+    border-radius: 0.5rem;
+    padding: 0.75rem;
+    background: #f8d7da;
+    color: #842029;
+    margin-bottom: 1rem;
+}
