@@ -3,6 +3,7 @@
 @rendermode InteractiveServer
 @using StudyTrack.Models
 @using StudyTrack.Services
+@using StudyTrack.Components.Shared
 @inject DashboardService DashboardService
 
 <PageTitle>StudyTrack Dashboard</PageTitle>
@@ -48,17 +49,86 @@ else if (summary is not null)
 
     <section class="dashboard-section">
         <h2>Upcoming Assignments</h2>
-        @RenderAssignmentList(summary.UpcomingAssignments, "No upcoming assignments in the next 7 days.")
+
+        @if (summary.UpcomingAssignments.Count == 0)
+        {
+            <div class="empty-state">No upcoming assignments in the next 7 days.</div>
+        }
+        else
+        {
+            <div class="dashboard-list">
+                @foreach (var assignment in summary.UpcomingAssignments)
+                {
+                    <article class="dashboard-list-item">
+                        <div class="dashboard-item-main">
+                            <a href="@($"/assignments/{assignment.Id}")" class="dashboard-item-title">@assignment.Title</a>
+                            <div class="muted-text">@(assignment.Course?.Name ?? "No course") • Due @assignment.DueDate.ToString("yyyy-MM-dd")</div>
+                        </div>
+
+                        <div class="dashboard-badge-row">
+                            <PriorityBadge Priority="assignment.Priority" />
+                            <StatusBadge Status="assignment.Status" />
+                        </div>
+                    </article>
+                }
+            </div>
+        }
     </section>
 
     <section class="dashboard-section dashboard-urgent">
         <h2>Overdue Assignments</h2>
-        @RenderAssignmentList(summary.OverdueAssignments, "No overdue assignments.")
+
+        @if (summary.OverdueAssignments.Count == 0)
+        {
+            <div class="empty-state">No overdue assignments.</div>
+        }
+        else
+        {
+            <div class="dashboard-list">
+                @foreach (var assignment in summary.OverdueAssignments)
+                {
+                    <article class="dashboard-list-item">
+                        <div class="dashboard-item-main">
+                            <a href="@($"/assignments/{assignment.Id}")" class="dashboard-item-title">@assignment.Title</a>
+                            <div class="muted-text">@(assignment.Course?.Name ?? "No course") • Due @assignment.DueDate.ToString("yyyy-MM-dd")</div>
+                        </div>
+
+                        <div class="dashboard-badge-row">
+                            <PriorityBadge Priority="assignment.Priority" />
+                            <StatusBadge Status="assignment.Status" />
+                        </div>
+                    </article>
+                }
+            </div>
+        }
     </section>
 
     <section class="dashboard-section">
         <h2>High-Priority Assignments</h2>
-        @RenderAssignmentList(summary.HighPriorityAssignments, "No high-priority pending assignments.")
+
+        @if (summary.HighPriorityAssignments.Count == 0)
+        {
+            <div class="empty-state">No high-priority pending assignments.</div>
+        }
+        else
+        {
+            <div class="dashboard-list">
+                @foreach (var assignment in summary.HighPriorityAssignments)
+                {
+                    <article class="dashboard-list-item">
+                        <div class="dashboard-item-main">
+                            <a href="@($"/assignments/{assignment.Id}")" class="dashboard-item-title">@assignment.Title</a>
+                            <div class="muted-text">@(assignment.Course?.Name ?? "No course") • Due @assignment.DueDate.ToString("yyyy-MM-dd")</div>
+                        </div>
+
+                        <div class="dashboard-badge-row">
+                            <PriorityBadge Priority="assignment.Priority" />
+                            <StatusBadge Status="assignment.Status" />
+                        </div>
+                    </article>
+                }
+            </div>
+        }
     </section>
 }
 
@@ -71,58 +141,4 @@ else if (summary is not null)
         summary = await DashboardService.GetDashboardSummaryAsync();
         isLoading = false;
     }
-
-    private RenderFragment RenderAssignmentList(List<AssignmentTask> assignments, string emptyMessage) => builder =>
-    {
-        var sequence = 0;
-
-        if (assignments.Count == 0)
-        {
-            builder.OpenElement(sequence++, "div");
-            builder.AddAttribute(sequence++, "class", "empty-state");
-            builder.AddContent(sequence++, emptyMessage);
-            builder.CloseElement();
-            return;
-        }
-
-        builder.OpenElement(sequence++, "div");
-        builder.AddAttribute(sequence++, "class", "dashboard-list");
-
-        foreach (var assignment in assignments)
-        {
-            builder.OpenElement(sequence++, "article");
-            builder.AddAttribute(sequence++, "class", "dashboard-list-item");
-
-            builder.OpenElement(sequence++, "div");
-            builder.AddAttribute(sequence++, "class", "dashboard-item-main");
-
-            builder.OpenElement(sequence++, "a");
-            builder.AddAttribute(sequence++, "href", $"/assignments/{assignment.Id}");
-            builder.AddAttribute(sequence++, "class", "dashboard-item-title");
-            builder.AddContent(sequence++, assignment.Title);
-            builder.CloseElement();
-
-            builder.OpenElement(sequence++, "div");
-            builder.AddAttribute(sequence++, "class", "muted-text");
-            builder.AddContent(sequence++, $"{assignment.Course?.Name ?? "No course"} • Due {assignment.DueDate:yyyy-MM-dd}");
-            builder.CloseElement();
-
-            builder.CloseElement();
-
-            builder.OpenElement(sequence++, "div");
-            builder.AddAttribute(sequence++, "class", "dashboard-badge-row");
-            builder.OpenComponentsequence++;
-            builder.AddAttribute(sequence++, "Priority", assignment.Priority);
-            builder.CloseComponent();
-
-            builder.OpenComponentsequence++;
-            builder.AddAttribute(sequence++, "Status", assignment.Status);
-            builder.CloseComponent();
-            builder.CloseElement();
-
-            builder.CloseElement();
-        }
-
-        builder.CloseElement();
-    };
 }
