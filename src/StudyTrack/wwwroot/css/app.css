@@ -243,3 +243,15 @@
         flex-direction: column;
     }
 }
+
+.filter-panel {
+    border-left: 6px solid #0d6efd;
+}
+
+.filter-panel .section-header {
+    margin-bottom: 1rem;
+}
+
+.filter-panel select {
+    min-height: 2.3rem;
+}

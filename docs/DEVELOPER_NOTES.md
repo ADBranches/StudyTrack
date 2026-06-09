@@ -31,3 +31,8 @@ Phase 4 implements Assignment Management CRUD. AssignmentService handles databas
 ## Phase 5 Notes
 
 Phase 5 implements dashboard summary views. DashboardService calculates assignment totals, pending count, completed count, overdue count, high-priority count, upcoming assignments, overdue assignments, and high-priority assignments. Dashboard.razor displays these summaries and links users to assignment details.
+
+
+## Phase 6 Notes
+
+Phase 6 adds filtering and sorting to assignment management. Users can filter assignments by course, status, and priority. Users can sort assignments by due date, priority, course, or status. Filters can be cleared from the assignment page.

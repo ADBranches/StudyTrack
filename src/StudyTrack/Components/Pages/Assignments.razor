@@ -3,6 +3,7 @@
 @using System.ComponentModel.DataAnnotations
 @using StudyTrack.Models
 @using StudyTrack.Services
+@using StudyTrack.Components.Shared
 @inject AssignmentService AssignmentService
 @inject CourseService CourseService
 
@@ -11,7 +12,7 @@
 <h1>Assignment Management</h1>
 
 <p class="lead">
-    Create, view, update, delete, complete, and reopen assignments. Assignments are connected to courses.
+    Create, view, update, delete, complete, reopen, filter, and sort assignments.
 </p>
 
 @if (!string.IsNullOrWhiteSpace(successMessage))
@@ -30,6 +31,63 @@
         Create at least one course before adding assignments.
     </div>
 }
+
+<section class="crud-panel filter-panel">
+    <div class="section-header">
+        <h2>Filter and Sort Assignments</h2>
+        <span class="record-count">@ActiveFilterText</span>
+    </div>
+
+    <div class="form-grid">
+        <div class="form-field">
+            <label for="filter-course">Course</label>
+            <select id="filter-course" class="form-control" @bind="selectedCourseId">
+                <option value="0">All courses</option>
+                @foreach (var course in courses)
+                {
+                    <option value="@course.Id">@course.Name</option>
+                }
+            </select>
+        </div>
+
+        <div class="form-field">
+            <label for="filter-status">Status</label>
+            <select id="filter-status" class="form-control" @bind="selectedStatus">
+                <option value="">All statuses</option>
+                <option value="Pending">Pending</option>
+                <option value="InProgress">In Progress</option>
+                <option value="Completed">Completed</option>
+                <option value="Overdue">Overdue</option>
+            </select>
+        </div>
+
+        <div class="form-field">
+            <label for="filter-priority">Priority</label>
+            <select id="filter-priority" class="form-control" @bind="selectedPriority">
+                <option value="">All priorities</option>
+                <option value="Low">Low</option>
+                <option value="Medium">Medium</option>
+                <option value="High">High</option>
+            </select>
+        </div>
+
+        <div class="form-field">
+            <label for="sort-by">Sort By</label>
+            <select id="sort-by" class="form-control" @bind="selectedSort">
+                <option value="due-date">Due date, earliest first</option>
+                <option value="due-date-desc">Due date, latest first</option>
+                <option value="priority">Priority, high first</option>
+                <option value="course">Course name</option>
+                <option value="status">Status</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="button-row">
+        <button type="button" class="btn btn-primary" @onclick="ApplyFiltersAsync">Apply Filters</button>
+        <button type="button" class="btn btn-secondary" @onclick="ClearFiltersAsync">Clear Filters</button>
+    </div>
+</section>
 
 <section class="crud-panel">
     <h2>@(editingAssignmentId is null ? "Add Assignment" : "Edit Assignment")</h2>
@@ -60,7 +118,6 @@
             <div class="form-field">
                 <label for="assignment-due-date">Due Date</label>
                 <InputDate id="assignment-due-date" class="form-control" @bind-Value="assignmentForm.DueDate" />
-                <ValidationMessage For="@(() => assignmentForm.DueDate)" />
             </div>
 
             <div class="form-field">
@@ -115,7 +172,7 @@
     else if (assignments.Count == 0)
     {
         <div class="empty-state">
-            No assignments exist yet. Use the form above to create the first assignment.
+            No assignments match the selected filters.
         </div>
     }
     else
@@ -177,6 +234,16 @@
     private string? successMessage;
     private string? errorMessage;
 
+    private int selectedCourseId;
+    private string selectedStatus = string.Empty;
+    private string selectedPriority = string.Empty;
+    private string selectedSort = "due-date";
+
+    private string ActiveFilterText =>
+        selectedCourseId == 0 && string.IsNullOrWhiteSpace(selectedStatus) && string.IsNullOrWhiteSpace(selectedPriority)
+            ? "No active filters"
+            : "Filters active";
+
     protected override async Task OnInitializedAsync()
     {
         await LoadDataAsync();
@@ -186,13 +253,56 @@
     {
         isLoading = true;
         courses = await CourseService.GetCoursesAsync();
-        assignments = await AssignmentService.GetAssignmentsAsync();
 
         if (assignmentForm.CourseId == 0 && courses.Count > 0)
         {
             assignmentForm.CourseId = courses[0].Id;
         }
 
+        await LoadAssignmentsAsync();
+        isLoading = false;
+    }
+
+    private async Task LoadAssignmentsAsync()
+    {
+        assignments = await AssignmentService.GetAssignmentsAsync(
+            selectedCourseId > 0 ? selectedCourseId : null,
+            TryParseStatus(),
+            TryParsePriority(),
+            selectedSort);
+    }
+
+    private AssignmentStatus? TryParseStatus()
+    {
+        return Enum.TryParse<AssignmentStatus>(selectedStatus, out var parsedStatus)
+            ? parsedStatus
+            : null;
+    }
+
+    private AssignmentPriority? TryParsePriority()
+    {
+        return Enum.TryParse<AssignmentPriority>(selectedPriority, out var parsedPriority)
+            ? parsedPriority
+            : null;
+    }
+
+    private async Task ApplyFiltersAsync()
+    {
+        ClearMessages();
+        isLoading = true;
+        await LoadAssignmentsAsync();
+        isLoading = false;
+    }
+
+    private async Task ClearFiltersAsync()
+    {
+        ClearMessages();
+        selectedCourseId = 0;
+        selectedStatus = string.Empty;
+        selectedPriority = string.Empty;
+        selectedSort = "due-date";
+        isLoading = true;
+        await LoadAssignmentsAsync();
         isLoading = false;
     }
 

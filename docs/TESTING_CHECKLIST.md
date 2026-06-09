@@ -73,3 +73,18 @@
 - [ ] Dashboard links open assignment details
 - [ ] Urgent items are visually separated
 - [ ] Project builds successfully
+
+
+## Phase 6 Checks
+
+- [ ] Assignments can be filtered by course
+- [ ] Assignments can be filtered by status
+- [ ] Assignments can be filtered by priority
+- [ ] Assignments can be sorted by due date ascending
+- [ ] Assignments can be sorted by due date descending
+- [ ] Assignments can be sorted by priority
+- [ ] Assignments can be sorted by course
+- [ ] Assignments can be sorted by status
+- [ ] Filters can be cleared
+- [ ] Filtered assignment results remain linked to assignment details
+- [ ] Project builds successfully

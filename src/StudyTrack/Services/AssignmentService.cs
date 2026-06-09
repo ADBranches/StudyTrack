@@ -13,13 +13,40 @@ public class AssignmentService
         _context = context;
     }
 
-    public async Task<List<AssignmentTask>> GetAssignmentsAsync()
+    public async Task<List<AssignmentTask>> GetAssignmentsAsync(
+        int? courseId = null,
+        AssignmentStatus? status = null,
+        AssignmentPriority? priority = null,
+        string sortBy = "due-date")
     {
-        return await _context.AssignmentTasks
-            .Include(assignment => assignment.Course)
-            .OrderBy(assignment => assignment.DueDate)
-            .ThenByDescending(assignment => assignment.Priority)
-            .ToListAsync();
+        IQueryable<AssignmentTask> query = _context.AssignmentTasks
+            .Include(assignment => assignment.Course);
+
+        if (courseId.HasValue && courseId.Value > 0)
+        {
+            query = query.Where(assignment => assignment.CourseId == courseId.Value);
+        }
+
+        if (status.HasValue)
+        {
+            query = query.Where(assignment => assignment.Status == status.Value);
+        }
+
+        if (priority.HasValue)
+        {
+            query = query.Where(assignment => assignment.Priority == priority.Value);
+        }
+
+        query = sortBy switch
+        {
+            "due-date-desc" => query.OrderByDescending(assignment => assignment.DueDate),
+            "priority" => query.OrderByDescending(assignment => assignment.Priority).ThenBy(assignment => assignment.DueDate),
+            "course" => query.OrderBy(assignment => assignment.Course!.Name).ThenBy(assignment => assignment.DueDate),
+            "status" => query.OrderBy(assignment => assignment.Status).ThenBy(assignment => assignment.DueDate),
+            _ => query.OrderBy(assignment => assignment.DueDate)
+        };
+
+        return await query.ToListAsync();
     }
 
     public async Task<AssignmentTask?> GetAssignmentByIdAsync(int id)

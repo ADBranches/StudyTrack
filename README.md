@@ -87,3 +87,18 @@ The dashboard now supports:
 - Overdue assignment list
 - High-priority assignment list
 - Links from dashboard items to assignment details
+
+
+## Phase 6 Filtering and Sorting
+
+Assignment filtering and sorting now supports:
+
+- Filter by course
+- Filter by status
+- Filter by priority
+- Sort by due date ascending
+- Sort by due date descending
+- Sort by priority
+- Sort by course
+- Sort by status
+- Clear filters
