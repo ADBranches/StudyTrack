@@ -287,3 +287,199 @@
     color: #842029;
     margin-bottom: 1rem;
 }
+
+/* Phase 9 UX, accessibility, and responsive polish */
+:root {
+    --studytrack-primary: #240046;
+    --studytrack-primary-light: #7b5ea7;
+    --studytrack-accent: #3b5bdb;
+    --studytrack-border: #d6d5d5;
+    --studytrack-surface: #ffffff;
+    --studytrack-muted: #555555;
+    --studytrack-focus: #ffbf47;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    color: #222222;
+    background: #f7f7fb;
+}
+
+.skip-link {
+    position: absolute;
+    left: -999px;
+    top: 0;
+    z-index: 9999;
+    padding: 0.75rem 1rem;
+    background: #ffffff;
+    color: #000000;
+    border: 3px solid var(--studytrack-focus);
+    border-radius: 0.35rem;
+}
+
+.skip-link:focus {
+    left: 1rem;
+    top: 1rem;
+}
+
+.studytrack-main {
+    background: #f7f7fb;
+    min-height: 100vh;
+}
+
+.content {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.content h1 {
+    font-size: clamp(2rem, 4vw, 2.6rem);
+    margin-bottom: 0.75rem;
+}
+
+.content h2 {
+    font-size: clamp(1.35rem, 3vw, 1.9rem);
+}
+
+.lead {
+    max-width: 860px;
+    line-height: 1.6;
+}
+
+.nav-link {
+    border-radius: 0.35rem;
+    transition: background-color 0.15s ease-in-out, color 0.15s ease-in-out;
+}
+
+.nav-link:focus,
+.navbar-brand:focus,
+button:focus,
+.btn:focus,
+input:focus,
+select:focus,
+textarea:focus,
+a:focus {
+    outline: 3px solid var(--studytrack-focus);
+    outline-offset: 2px;
+}
+
+.crud-panel,
+.details-panel,
+.dashboard-section,
+.summary-card,
+.placeholder-panel {
+    border-color: var(--studytrack-border);
+    border-radius: 0.85rem;
+}
+
+.crud-panel,
+.details-panel,
+.dashboard-section {
+    overflow-x: auto;
+}
+
+.form-control {
+    min-height: 2.35rem;
+}
+
+label {
+    color: #222222;
+}
+
+.btn {
+    min-height: 2.25rem;
+    border-radius: 0.35rem;
+    font-weight: 600;
+}
+
+.btn-sm {
+    min-height: 2rem;
+}
+
+.table {
+    background: #ffffff;
+}
+
+.table th {
+    white-space: nowrap;
+}
+
+.table td {
+    line-height: 1.45;
+}
+
+.empty-state {
+    font-weight: 600;
+}
+
+.feedback-panel {
+    max-width: 900px;
+}
+
+.dashboard-grid {
+    align-items: stretch;
+}
+
+.summary-card {
+    min-height: 6.5rem;
+}
+
+.dashboard-item-title {
+    color: #124bc2;
+}
+
+.dashboard-item-title:hover {
+    color: #0a2f7a;
+}
+
+@media (max-width: 900px) {
+    .content {
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+    }
+
+    .section-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .button-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .button-row .btn,
+    .course-table .btn,
+    .assignment-table .btn,
+    .study-session-table .btn {
+        width: 100%;
+        margin-top: 0.25rem;
+    }
+
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 700px) {
+    .table {
+        font-size: 0.92rem;
+    }
+
+    .crud-panel,
+    .details-panel,
+    .dashboard-section {
+        padding: 0.85rem;
+    }
+
+    .studytrack-footer {
+        text-align: center;
+    }
+}

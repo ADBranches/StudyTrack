@@ -128,3 +128,17 @@ Validation and user feedback now includes:
 - Friendly application error page
 - Defensive service checks for invalid IDs and required values
 - Success and error feedback after important actions
+
+
+## Phase 9 UX and Accessibility Polish
+
+Design and usability improvements include:
+
+- Consistent navigation
+- Keyboard skip link
+- Visible focus outlines
+- Improved responsive layout
+- Clearer form spacing
+- Consistent button styling
+- More readable cards and tables
+- Improved empty-state presentation

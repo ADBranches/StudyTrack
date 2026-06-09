@@ -1,16 +1,18 @@
 @inherits LayoutComponentBase
 
+<a class="skip-link" href="#main-content">Skip to main content</a>
+
 <div class="page">
     <div class="sidebar">
         <NavMenu />
     </div>
 
-    <main>
+    <main class="studytrack-main">
         <div class="top-row px-4 studytrack-topbar">
             <span class="app-tagline">Student Assignment and Study Planner</span>
         </div>
 
-        <article class="content px-4">
+        <article id="main-content" class="content px-4" tabindex="-1">
             @Body
         </article>
 

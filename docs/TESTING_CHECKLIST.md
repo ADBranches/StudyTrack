@@ -119,3 +119,18 @@
 - [ ] Error feedback appears when an action cannot be completed
 - [ ] Services include defensive checks for invalid IDs
 - [ ] Project builds successfully
+
+
+## Phase 9 Checks
+
+- [ ] Navigation is clear and consistent
+- [ ] Skip link exists for keyboard users
+- [ ] Focus outlines are visible
+- [ ] Page headings are consistent
+- [ ] Form labels are visible and meaningful
+- [ ] Buttons are readable and consistently styled
+- [ ] Tables/cards remain usable on smaller screens
+- [ ] Empty-state messages are readable
+- [ ] Color contrast is readable
+- [ ] Dashboard, Courses, and Assignments pages remain functional
+- [ ] Project builds successfully

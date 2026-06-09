@@ -46,3 +46,8 @@ Phase 7 implements study session planning. StudySessionService handles create, l
 ## Phase 8 Notes
 
 Phase 8 improves validation, error handling, and user feedback. ValidationMessagePanel provides reusable success, error, and warning messages. CourseService and AssignmentService include defensive checks for invalid IDs and required values. Error.razor provides a friendlier fallback error page.
+
+
+## Phase 9 Notes
+
+Phase 9 improves design, UX, accessibility, and responsiveness. The app now includes a skip link, visible focus outlines, clearer layout spacing, improved responsive form/table behavior, and more consistent visual styling across dashboard, course, assignment, and study-session workflows.
