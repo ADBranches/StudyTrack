@@ -58,3 +58,18 @@
 - [ ] Friendly not-found message appears for invalid assignment ID
 - [ ] Status and priority badges display clearly
 - [ ] Project builds successfully
+
+
+## Phase 5 Checks
+
+- [ ] Dashboard displays total assignment count
+- [ ] Dashboard displays pending count
+- [ ] Dashboard displays completed count
+- [ ] Dashboard displays overdue count
+- [ ] Dashboard displays high-priority count
+- [ ] Upcoming assignments list displays
+- [ ] Overdue assignments list displays
+- [ ] High-priority assignments list displays
+- [ ] Dashboard links open assignment details
+- [ ] Urgent items are visually separated
+- [ ] Project builds successfully

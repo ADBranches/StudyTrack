@@ -1,27 +1,128 @@
 @page "/"
 @page "/dashboard"
+@rendermode InteractiveServer
+@using StudyTrack.Models
+@using StudyTrack.Services
+@inject DashboardService DashboardService
 
 <PageTitle>StudyTrack Dashboard</PageTitle>
 
 <h1>StudyTrack Dashboard</h1>
 
 <p class="lead">
-    Welcome to StudyTrack. This dashboard will summarize courses, assignments, deadlines, and study progress.
+    Quickly review upcoming, overdue, completed, and high-priority assignments.
 </p>
 
-<section class="dashboard-grid">
-    <div class="summary-card">
-        <h2>Upcoming</h2>
-        <p>Assignments due soon will appear here.</p>
-    </div>
+@if (isLoading)
+{
+    <p><em>Loading dashboard...</em></p>
+}
+else if (summary is not null)
+{
+    <section class="dashboard-grid">
+        <div class="summary-card">
+            <span class="summary-label">Total Assignments</span>
+            <strong class="summary-number">@summary.TotalAssignments</strong>
+        </div>
 
-    <div class="summary-card">
-        <h2>Overdue</h2>
-        <p>Overdue assignments will be highlighted here.</p>
-    </div>
+        <div class="summary-card">
+            <span class="summary-label">Pending</span>
+            <strong class="summary-number">@summary.PendingCount</strong>
+        </div>
 
-    <div class="summary-card">
-        <h2>Completed</h2>
-        <p>Completed assignment progress will be shown here.</p>
-    </div>
-</section>
+        <div class="summary-card summary-completed">
+            <span class="summary-label">Completed</span>
+            <strong class="summary-number">@summary.CompletedCount</strong>
+        </div>
+
+        <div class="summary-card summary-overdue">
+            <span class="summary-label">Overdue</span>
+            <strong class="summary-number">@summary.OverdueCount</strong>
+        </div>
+
+        <div class="summary-card summary-high">
+            <span class="summary-label">High Priority</span>
+            <strong class="summary-number">@summary.HighPriorityCount</strong>
+        </div>
+    </section>
+
+    <section class="dashboard-section">
+        <h2>Upcoming Assignments</h2>
+        @RenderAssignmentList(summary.UpcomingAssignments, "No upcoming assignments in the next 7 days.")
+    </section>
+
+    <section class="dashboard-section dashboard-urgent">
+        <h2>Overdue Assignments</h2>
+        @RenderAssignmentList(summary.OverdueAssignments, "No overdue assignments.")
+    </section>
+
+    <section class="dashboard-section">
+        <h2>High-Priority Assignments</h2>
+        @RenderAssignmentList(summary.HighPriorityAssignments, "No high-priority pending assignments.")
+    </section>
+}
+
+@code {
+    private DashboardSummary? summary;
+    private bool isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        summary = await DashboardService.GetDashboardSummaryAsync();
+        isLoading = false;
+    }
+
+    private RenderFragment RenderAssignmentList(List<AssignmentTask> assignments, string emptyMessage) => builder =>
+    {
+        var sequence = 0;
+
+        if (assignments.Count == 0)
+        {
+            builder.OpenElement(sequence++, "div");
+            builder.AddAttribute(sequence++, "class", "empty-state");
+            builder.AddContent(sequence++, emptyMessage);
+            builder.CloseElement();
+            return;
+        }
+
+        builder.OpenElement(sequence++, "div");
+        builder.AddAttribute(sequence++, "class", "dashboard-list");
+
+        foreach (var assignment in assignments)
+        {
+            builder.OpenElement(sequence++, "article");
+            builder.AddAttribute(sequence++, "class", "dashboard-list-item");
+
+            builder.OpenElement(sequence++, "div");
+            builder.AddAttribute(sequence++, "class", "dashboard-item-main");
+
+            builder.OpenElement(sequence++, "a");
+            builder.AddAttribute(sequence++, "href", $"/assignments/{assignment.Id}");
+            builder.AddAttribute(sequence++, "class", "dashboard-item-title");
+            builder.AddContent(sequence++, assignment.Title);
+            builder.CloseElement();
+
+            builder.OpenElement(sequence++, "div");
+            builder.AddAttribute(sequence++, "class", "muted-text");
+            builder.AddContent(sequence++, $"{assignment.Course?.Name ?? "No course"} • Due {assignment.DueDate:yyyy-MM-dd}");
+            builder.CloseElement();
+
+            builder.CloseElement();
+
+            builder.OpenElement(sequence++, "div");
+            builder.AddAttribute(sequence++, "class", "dashboard-badge-row");
+            builder.OpenComponentsequence++;
+            builder.AddAttribute(sequence++, "Priority", assignment.Priority);
+            builder.CloseComponent();
+
+            builder.OpenComponentsequence++;
+            builder.AddAttribute(sequence++, "Status", assignment.Status);
+            builder.CloseComponent();
+            builder.CloseElement();
+
+            builder.CloseElement();
+        }
+
+        builder.CloseElement();
+    };
+}

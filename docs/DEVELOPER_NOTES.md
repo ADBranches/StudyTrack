@@ -26,3 +26,8 @@ Phase 3 implements Course Management CRUD. CourseService handles database operat
 ## Phase 4 Notes
 
 Phase 4 implements Assignment Management CRUD. AssignmentService handles database operations. Assignments.razor provides list, create, edit, delete, complete, and reopen workflows with validation and feedback. AssignmentDetails.razor shows assignment metadata and connected study sessions. StatusBadge and PriorityBadge provide clear visual status/priority indicators.
+
+
+## Phase 5 Notes
+
+Phase 5 implements dashboard summary views. DashboardService calculates assignment totals, pending count, completed count, overdue count, high-priority count, upcoming assignments, overdue assignments, and high-priority assignments. Dashboard.razor displays these summaries and links users to assignment details.

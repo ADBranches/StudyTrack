@@ -72,3 +72,18 @@ Assignment management now supports:
 - Viewing study sessions connected to an assignment
 - Displaying status and priority badges
 - Validation and user feedback
+
+
+## Phase 5 Dashboard
+
+The dashboard now supports:
+
+- Total assignment count
+- Pending assignment count
+- Completed assignment count
+- Overdue assignment count
+- High-priority assignment count
+- Upcoming assignment list
+- Overdue assignment list
+- High-priority assignment list
+- Links from dashboard items to assignment details

@@ -13,6 +13,7 @@ builder.Services.AddDbContext<StudyTrackDbContext>(options =>
 
 builder.Services.AddScoped<CourseService>();
 builder.Services.AddScoped<AssignmentService>();
+builder.Services.AddScoped<DashboardService>();
 
 var app = builder.Build();
 
